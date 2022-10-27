@@ -1,4 +1,6 @@
 export const USER_COLLECTION_NAME = 'User';
+export const POST_COLLECTION_NAME = 'Post';
+export const COMMENT_COLLECTION_NAME = 'Comment';
 
 // Session
 export const SESSION_PREFIX = 'Instagram-clone-session:';

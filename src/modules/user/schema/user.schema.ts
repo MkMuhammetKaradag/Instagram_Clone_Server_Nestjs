@@ -1,6 +1,9 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { USER_COLLECTION_NAME } from 'src/config/contants';
+import {
+  POST_COLLECTION_NAME,
+  USER_COLLECTION_NAME,
+} from 'src/config/contants';
 export type UserDocument = User & Document;
 
 @Schema({
@@ -59,6 +62,27 @@ export class User {
     default: [],
   })
   followUps: string[];
+  @Prop({
+    type: [
+      {
+        type: Types.ObjectId,
+        ref: POST_COLLECTION_NAME,
+      },
+    ],
+    default: [],
+  })
+  userPosts: string[];
+
+  @Prop({
+    type: [
+      {
+        type: Types.ObjectId,
+        ref: POST_COLLECTION_NAME,
+      },
+    ],
+    default: [],
+  })
+  userLikes: string[];
 
   @Prop({
     type: Boolean,

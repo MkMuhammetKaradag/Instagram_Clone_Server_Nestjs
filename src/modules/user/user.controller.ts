@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -11,7 +12,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { UserService } from './user.service';
-import { Session as SessionDoc } from 'express-session';
+import session, { Session as SessionDoc } from 'express-session';
 
 @Controller('User')
 @ApiTags('User')
@@ -20,11 +21,12 @@ export class UserController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  public async getUsers() {
-    const users = ['Muhammet karadağ', 'Ali Karadağ'];
+  @UseGuards(AuthGuard)
+  public async getUser(@Session() session: SessionDoc) {
+    const user = await this.userService.getUser(session.context.id);
     return {
       message: 'User Fetched',
-      data: { users },
+      data: { user },
     };
   }
 
@@ -41,6 +43,24 @@ export class UserController {
     );
     return {
       message: 'Follow Up  User',
+      data: {
+        followUps,
+      },
+    };
+  }
+  @Delete('/unfollow/:unfollowUserId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  public async unfollow(
+    @Session() session: SessionDoc,
+    @Param('unfollowUserId') unfollowUserId: string,
+  ) {
+    const { followUps } = await this.userService.unfollow(
+      session.context.id,
+      unfollowUserId,
+    );
+    return {
+      message: 'Unfollow User',
       data: {
         followUps,
       },
