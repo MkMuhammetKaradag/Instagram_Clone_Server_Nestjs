@@ -66,6 +66,26 @@ export class User {
     type: [
       {
         type: Types.ObjectId,
+        ref: USER_COLLECTION_NAME,
+      },
+    ],
+    default: [],
+  })
+  myFollowRequests: string[];
+  @Prop({
+    type: [
+      {
+        type: Types.ObjectId,
+        ref: USER_COLLECTION_NAME,
+      },
+    ],
+    default: [],
+  })
+  followRequests: string[];
+  @Prop({
+    type: [
+      {
+        type: Types.ObjectId,
         ref: POST_COLLECTION_NAME,
       },
     ],

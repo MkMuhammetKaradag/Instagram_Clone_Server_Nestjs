@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Options } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { S3Service } from 'src/provider/s3/s3.service';
@@ -9,6 +9,9 @@ import { Comment, CommentDocument } from './schema/comment.schema';
 import { Post, PostDocument } from './schema/post.schema';
 import { nanoid } from 'nanoid';
 import sharp from 'sharp';
+import { User } from '../user/schema/user.schema';
+import { USER_COLLECTION_NAME } from 'src/config/contants';
+import { truncate } from 'fs/promises';
 @Injectable()
 export class PostService {
   constructor(
@@ -20,6 +23,23 @@ export class PostService {
     private readonly s3Service: S3Service,
   ) {}
 
+  public async getPosts(userId: string) {
+    // return await this.PostModel.aggregate().lookup({
+    //   from: 'User',
+    //   localField: 'owner',
+    //   foreignField: '_id',
+    //   as: 'users',
+    // });
+    const posts = await this.PostModel.find().populate({
+      path: 'owner',
+      select: 'userNickName userProfilePicture',
+      match: { profilePrivate: false },
+    });
+    const newPosts = posts.filter((post) => {
+      return post?.owner != null;
+    });
+    return newPosts;
+  }
   /**
    * async createdPost
    */
@@ -55,28 +75,9 @@ export class PostService {
   public async convertImageTypeToWebp(buffer: Buffer): Promise<Buffer> {
     const buff = await sharp(buffer).webp({ lossless: true }).toBuffer();
 
-    // this.logger.debug('Image converted to webp', S3Service.name);
-
     return buff;
   }
 
-  // public async uploadPostImage(courseId: string, file: Buffer) {
-  //   const path = `courses/${courseId}/thumbnails/${nanoid(10)}.webp`;
-  //   const imageUrl = this.s3Service.generateFileUrl(path);
-
-  //   const webpImg = await this.convertImageTypeToWebp(file);
-  //   await this.s3Service.uploadFileToS3(path, webpImg);
-
-  //   return this.CourseModel.findByIdAndUpdate(
-  //     courseId,
-  //     { thumbnail: imageUrl },
-  //     { new: true },
-  //   ).exec();
-  // }
-
-  /**
-   * addCommentToPost
-   */
   public async addCommentToPost(
     userId: string,
     postId: string,
@@ -147,5 +148,22 @@ export class PostService {
       const { userLikes } = await this.userService.removeLike(userId, postId);
     }
     return userPost;
+  }
+  public async getMyPosts(userId: string): Promise<PostDocument[]> {
+    const myPosts = await this.PostModel.find({ owner: userId });
+    return myPosts;
+  }
+
+  public async getMyFollowUpsPosts(userId: string): Promise<PostDocument[]> {
+    const { followUps } = await this.userService.getUserById(userId);
+    const usersID = followUps.map((user) => user.toString());
+
+    const myPosts = await this.PostModel.find({
+      owner: { $in: usersID },
+    });
+    // const myPosts = await this.PostModel.find({
+    //   owner: '63578f6761e297c1a19c1b70',
+    // });
+    return myPosts;
   }
 }

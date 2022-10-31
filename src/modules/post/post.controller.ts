@@ -12,6 +12,7 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  Get,
 } from '@nestjs/common';
 import { ApiTags, ApiBody, ApiConsumes } from '@nestjs/swagger';
 
@@ -26,6 +27,18 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  public async getPost(@Session() session: SessionDoc) {
+    const posts = await this.postService.getPosts(session.context.id);
+    return {
+      message: 'get Posts',
+      data: {
+        posts,
+      },
+    };
+  }
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(AuthGuard)
@@ -50,8 +63,12 @@ export class PostController {
   // })
   @UseInterceptors(
     FileInterceptor('file', {
-      fileFilter: (_, { mimetype }, cb) => {
-        if (mimetype.includes('image') || mimetype.includes('video')) {
+      fileFilter: ({ body }, { mimetype }, cb) => {
+        //console.log(body);
+        if (
+          (mimetype.includes('image') && body?.type == 'IMAGE') ||
+          (mimetype.includes('video') && body?.type == 'VIDEO')
+        ) {
           return cb(null, true);
         }
         return cb(new BadRequestException('File type must be image'), false);
@@ -64,7 +81,7 @@ export class PostController {
     @Body() createPostDto: CreatePostDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log('file:', file);
+    //console.log('file:', file);
     const post = await this.postService.createdPost(
       session.context.id,
       createPostDto,
@@ -73,7 +90,7 @@ export class PostController {
     return {
       message: 'created Post',
       data: {
-        post,
+        post: post,
       },
     };
   }
@@ -135,6 +152,34 @@ export class PostController {
       message: 'add comment',
       data: {
         likes,
+      },
+    };
+  }
+
+  @Get('/myPosts')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  public async getMyPosts(@Session() session: SessionDoc) {
+    const myPosts = await this.postService.getMyPosts(session.context.id);
+    return {
+      message: 'get my posts',
+      data: {
+        myPosts,
+      },
+    };
+  }
+
+  @Get('/myFollowUpsPosts')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  public async getMyFollowUpsPosts(@Session() session: SessionDoc) {
+    const myFollowUpsPosts = await this.postService.getMyFollowUpsPosts(
+      session.context.id,
+    );
+    return {
+      message: 'get my follow ups  posts',
+      data: {
+        myFollowUpsPosts,
       },
     };
   }

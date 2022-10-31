@@ -13,7 +13,7 @@ export enum ContentType {
   IMAGE = 'IMAGE',
 }
 
-@Schema({ collection: POST_COLLECTION_NAME })
+@Schema({ collection: POST_COLLECTION_NAME, timestamps: true })
 export class Post {
   @Prop({
     type: String,
@@ -92,6 +92,13 @@ export class Post {
     default: false,
   })
   deleted: boolean;
+
+  // @Prop({
+  //   type: Date,
+  //   required: true,
+  //   default: Date.now,
+  // })
+  // created_at:string;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
