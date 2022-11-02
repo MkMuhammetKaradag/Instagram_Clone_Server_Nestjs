@@ -83,7 +83,7 @@ export class AuthController {
     const user = await this.authService.getMe(session.context.id);
     return {
       message: 'Get me',
-      data: [user],
+      data: { user },
     };
   }
 }

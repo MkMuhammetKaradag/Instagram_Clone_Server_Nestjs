@@ -54,7 +54,9 @@ export class UserService {
   }
 
   public async getUserById(userId: string): Promise<UserDocument> {
-    const user = await this.UserModel.findById(userId);
+    const user = await this.UserModel.findById(userId).select(
+      '_id userProfilePicture userNickName email',
+    );
 
     return user;
 
