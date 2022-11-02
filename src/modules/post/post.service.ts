@@ -24,27 +24,87 @@ export class PostService {
   ) {}
 
   public async getPosts(userId: string) {
-    // return await this.PostModel.aggregate().lookup({
+    const posts = await this.PostModel.aggregate([
+      {
+        $lookup: {
+          from: 'User',
+          localField: 'owner_1',
+          // let: { userEmail: '$email', userNickName: '$userNickName' },
+          foreignField: 'email',
+          as: 'user',
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                userNickName: 1,
+                userProfilePicture: 1,
+                profilePrivate: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $group: {
+      //     users: {
+      //       $push: {
+      //         $arrayElemAt: ['$user', 0],
+      //       },
+      //     },
+      //   },
+      // },
+      {
+        $project: {
+          _id: 1,
+          description: 1,
+          type: 1,
+
+          filtereduser: {
+            $filter: {
+              input: '$user',
+              cond: { $eq: [false, '$$this.profilePrivate'] },
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          filtereduser: { $ne: [] },
+        },
+      },
+
+      // {
+      //   $replaceRoot: {
+      //     newRoot: {
+      //       $mergeObjects: [{ $arrayElemAt: ['$fromItems', 0] }, '$$ROOT'],
+      //     },
+      //   },
+      // },
+      // { $project: { fromItems: 0 } },
+    ]);
+    // .lookup({
     //   from: 'User',
     //   localField: 'owner',
     //   foreignField: '_id',
     //   as: 'users',
+    // })
+    // .exec();
+    // const posts = await this.PostModel.find().populate({
+    //   path: 'owner',
+    //   select: 'userNickName userProfilePicture',
+    //   match: { profilePrivate: false },
     // });
-    const posts = await this.PostModel.find().populate({
-      path: 'owner',
-      select: 'userNickName userProfilePicture',
-      match: { profilePrivate: false },
-    });
-    const newPosts = posts.filter((post) => {
-      return post?.owner != null;
-    });
-    return newPosts;
+    // const newPosts = posts.filter((post) => {
+    //   return post?.owner != null;
+    // });
+    return posts;
   }
   /**
    * async createdPost
    */
   public async createdPost(
     UserId: string,
+    email: string,
     createdPost: CreatePostDto,
     file: Buffer,
   ): Promise<PostDocument> {
@@ -64,6 +124,7 @@ export class PostService {
     const post = await this.PostModel.create({
       ...createdPost,
       owner: UserId,
+      owner_1: email,
       image_url: createdPost.type == 'IMAGE' ? fileUrl : null,
       video_url: createdPost.type == 'VIDEO' ? fileUrl : null,
     });

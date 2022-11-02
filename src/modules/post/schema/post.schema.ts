@@ -57,6 +57,11 @@ export class Post {
     required: true,
   })
   owner: string;
+  @Prop({
+    type: String,
+    required: true,
+  })
+  owner_1: string;
 
   @Prop({
     type: [

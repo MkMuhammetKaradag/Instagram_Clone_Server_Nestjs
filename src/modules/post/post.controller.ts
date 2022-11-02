@@ -84,6 +84,7 @@ export class PostController {
     //console.log('file:', file);
     const post = await this.postService.createdPost(
       session.context.id,
+      session.context.email,
       createPostDto,
       file.buffer,
     );
