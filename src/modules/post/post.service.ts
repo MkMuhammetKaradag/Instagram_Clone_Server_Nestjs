@@ -25,18 +25,20 @@ export class PostService {
 
   public async getPosts(userId: string) {
     const posts = await this.PostModel.aggregate([
+      { $set: { owner: { $toObjectId: '$owner' } } },
       {
         $lookup: {
           from: 'User',
-          localField: 'owner_1',
+          localField: 'owner',
           // let: { userEmail: '$email', userNickName: '$userNickName' },
-          foreignField: 'email',
+          foreignField: '_id',
           as: 'user',
           pipeline: [
             {
               $project: {
                 _id: 1,
                 userNickName: 1,
+                email: 1,
                 userProfilePicture: 1,
                 profilePrivate: 1,
               },
@@ -58,6 +60,7 @@ export class PostService {
           _id: 1,
           description: 1,
           type: 1,
+          owner: 1,
 
           filtereduser: {
             $filter: {
@@ -104,7 +107,6 @@ export class PostService {
    */
   public async createdPost(
     UserId: string,
-    email: string,
     createdPost: CreatePostDto,
     file: Buffer,
   ): Promise<PostDocument> {
@@ -124,7 +126,6 @@ export class PostService {
     const post = await this.PostModel.create({
       ...createdPost,
       owner: UserId,
-      owner_1: email,
       image_url: createdPost.type == 'IMAGE' ? fileUrl : null,
       video_url: createdPost.type == 'VIDEO' ? fileUrl : null,
     });

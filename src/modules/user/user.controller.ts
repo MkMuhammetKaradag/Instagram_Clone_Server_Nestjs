@@ -36,14 +36,17 @@ export class UserController {
       data: { users },
     };
   }
-  @Get('/:userId')
+  @Get('/:userNickName')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   public async getUserId(
-    @Param('userId') userid: string,
+    @Param('userNickName') userNickName: string,
     @Session() session: SessionDoc,
   ) {
-    const user = await this.userService.getUserId(userid, session.context.id);
+    const user = await this.userService.getUserNickName(
+      userNickName,
+      session.context.id,
+    );
     return {
       message: 'User Fetched',
       data: { user },

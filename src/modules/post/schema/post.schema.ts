@@ -6,6 +6,7 @@ import {
   POST_COLLECTION_NAME,
   USER_COLLECTION_NAME,
 } from 'src/config/contants';
+import { User } from 'src/modules/user/schema/user.schema';
 
 export type PostDocument = Post & Document;
 export enum ContentType {
@@ -57,11 +58,6 @@ export class Post {
     required: true,
   })
   owner: string;
-  @Prop({
-    type: String,
-    required: true,
-  })
-  owner_1: string;
 
   @Prop({
     type: [

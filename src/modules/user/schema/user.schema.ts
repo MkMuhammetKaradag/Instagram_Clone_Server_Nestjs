@@ -5,6 +5,7 @@ import {
   USER_COLLECTION_NAME,
 } from 'src/config/contants';
 export type UserDocument = User & Document;
+export type UserGender = 'MALE' | 'FEMALE' | null;
 
 @Schema({
   collection: USER_COLLECTION_NAME,
@@ -109,6 +110,31 @@ export class User {
     default: false,
   })
   profilePrivate: boolean;
+
+  @Prop({
+    type: String,
+    trim: true,
+  })
+  website: string;
+
+  @Prop({
+    type: String,
+  })
+  bio: string;
+
+  @Prop({
+    type: String,
+    trim: true,
+  })
+  phoneNumber: string;
+
+  @Prop({
+    type: String,
+    enum: ['MALE', 'FEMALE', null],
+    default: null,
+    required: true,
+  })
+  gender: UserGender;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

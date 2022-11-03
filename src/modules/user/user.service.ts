@@ -67,16 +67,29 @@ export class UserService {
     //   '',
     // );
   }
-  public async getUserId(
-    userId: string,
-    myUserId: string,
-  ): Promise<UserDocument> {
+  public async getUserNickName(userNickName: string, myUserId: string) {
     const user = await this.UserModel.findOne({
       $or: [
-        { _id: userId, profilePrivate: false },
-        { _id: userId, followers: { $in: myUserId } },
+        { userNickName: userNickName, profilePrivate: false },
+        { userNickName: userNickName, followers: { $in: myUserId } },
       ],
-    });
+    }).select('-userLikes -followRequests -myFollowRequests');
+
+    if (!user) {
+      const privateUser = await this.UserModel.findOne({
+        userNickName: userNickName,
+      }).select('userNickName _id  userProfilePicture followers followUps');
+      if (!privateUser) {
+        throw new HttpException('Cannot  user.', HttpStatus.BAD_REQUEST);
+      }
+      return {
+        followers: privateUser.followUps.length,
+        userNickName: privateUser.userNickName,
+        _id: privateUser._id,
+        followUps: privateUser.followUps.length,
+        userProfilePicture: privateUser.userProfilePicture,
+      };
+    }
 
     return user;
   }
