@@ -1,6 +1,8 @@
 export const USER_COLLECTION_NAME = 'User';
 export const POST_COLLECTION_NAME = 'Post';
 export const COMMENT_COLLECTION_NAME = 'Comment';
+export const CHAT_COLLECTION_NAME = 'Chat';
+export const MESSAGE_COLLECTION_NAME = 'Message';
 
 // Session
 export const SESSION_PREFIX = 'Instagram-clone-session:';

@@ -29,6 +29,7 @@ export class AuthController {
     @Session() session: SessionDoc,
   ) {
     const user = await this.authService.login(loginUserDto);
+
     session.context = {
       id: user._id,
       email: user.email,
@@ -43,6 +44,7 @@ export class AuthController {
           _id: user._id,
           email: user.email,
           userProfilePicture: user.userProfilePicture,
+          userNickName: user.userNickName,
         },
       },
     };
