@@ -8,12 +8,14 @@ import {
   CHAT_COLLECTION_NAME,
   MESSAGE_COLLECTION_NAME,
 } from 'src/config/contants';
+import { UserModule } from '../user/user.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: CHAT_COLLECTION_NAME, schema: ChatSchema },
       { name: MESSAGE_COLLECTION_NAME, schema: MessageSchema },
     ]),
+    UserModule,
   ],
   providers: [ChatService, Logger],
   controllers: [ChatController],

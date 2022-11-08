@@ -1,7 +1,8 @@
-import { IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, Length } from 'class-validator';
 
 export class CreateMessageDto {
-  ReciverId: string;
-  SenderId: string;
+  @ApiProperty()
+  @Length(1, 200)
   MessageText: string;
 }

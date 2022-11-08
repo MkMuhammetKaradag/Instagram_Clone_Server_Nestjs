@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { UserService } from '../user/user.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { ChatDocument } from './schema/chat.schema';
@@ -13,28 +14,53 @@ export class ChatService {
     private readonly ChatModal: Model<ChatDocument>,
     @InjectModel('Message')
     private readonly MessageModal: Model<MessageDocument>,
+
+    private readonly userService: UserService,
   ) {}
 
   public async getChats(userId) {
-    const chat = this.ChatModal.find({
+    const chat = await this.ChatModal.find({
       users: { $in: userId },
-    });
+    })
+      .populate({
+        path: 'users',
+        select: 'userNickName userProfilePicture _id',
+      })
+      .select('users _id');
+
     return chat;
   }
   public async getAllMessages(chatId: string) {
     const chat = this.ChatModal.findById(chatId).populate({
       path: 'Messages',
       // select: '',
+      populate: {
+        path: 'from',
+        select: ' userNickName userProfilePicture',
+      },
     });
     return chat;
   }
 
-  public async addMessage(createMessage: CreateMessageDto, chatId: string) {
-    const message = await this.MessageModal.create(createMessage);
+  public async addMessage(
+    createMessage: CreateMessageDto,
+    chatId: string,
+    sessionId: string,
+  ) {
+    // console.log(chatId, createMessage.MessageText, sessionId);
+
+    const message = await this.MessageModal.create({
+      ...createMessage,
+      from: sessionId,
+    });
+    const newMessage = await message.populate({
+      path: 'from',
+      select: 'userNickName userProfilePicture',
+    });
     if (message) {
       await this.addChatMessage(chatId, message._id);
     }
-    return message;
+    return newMessage;
   }
 
   public async createChat(userId: string, sessionId: string) {
@@ -45,7 +71,10 @@ export class ChatService {
     if (hasChat) {
       throw new HttpException('Cannot  chat created.', HttpStatus.BAD_REQUEST);
     }
-    const chat = this.ChatModal.create({ users: [userId, sessionId] });
+    const chat = await this.ChatModal.create({ users: [userId, sessionId] });
+    if (chat) {
+      const users = this.userService.addChat(chat._id, userId, sessionId);
+    }
     return chat;
   }
   public async addChatMessage(ChatId: string, messageId: string) {

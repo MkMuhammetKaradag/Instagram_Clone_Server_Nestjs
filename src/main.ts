@@ -6,6 +6,8 @@ import { FRONTEND_URL, PORT, SESSION_SECRET } from './config';
 import { RedisService } from './provider/redis/redis.service';
 import cookieParser from 'cookie-parser';
 import { session } from './common/middleware/session.middleware';
+import { EventsAdapter } from './utils/EventsAdapter';
+import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const redisService = app.get(RedisService);
@@ -21,6 +23,8 @@ async function bootstrap() {
     .setVersion(API_VERSION)
     .build();
   const document = SwaggerModule.createDocument(app, config);
+  app.useWebSocketAdapter(new EventsAdapter(app));
+
   SwaggerModule.setup(`${GLOBAL_PREFIX}/docs`, app, document);
   await app.listen(PORT);
 }

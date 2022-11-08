@@ -8,7 +8,30 @@ declare module 'express-session' {
     };
   }
 }
-
+// declare module 'socket.io' {
+// export interface Handshake {
+//   session: {
+//     context: {
+//       id: string;
+//       email: string;
+//       userProfilePicture: string;
+//       userNickName: string;
+//     };
+//   };
+// }
+// }
+declare module 'socket.io' {
+  interface Handshake {
+    session: {
+      context: {
+        id: string;
+        email: string;
+        userProfilePicture: string;
+        userNickName: string;
+      };
+    };
+  }
+}
 declare global {
   namespace NodeJS {
     interface ProcessEnv {

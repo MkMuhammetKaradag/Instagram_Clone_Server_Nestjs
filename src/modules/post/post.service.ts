@@ -218,14 +218,31 @@ export class PostService {
 
   public async getMyFollowUpsPosts(userId: string): Promise<PostDocument[]> {
     const { followUps } = await this.userService.getUserById(userId);
-    const usersID = followUps.map((user) => user.toString());
+    if (followUps) {
+      const usersID = followUps.map((user) => user.toString());
 
-    const myPosts = await this.PostModel.find({
-      owner: { $in: usersID },
-    });
+      const myPosts = await this.PostModel.find({
+        owner: { $in: usersID },
+      })
+        .populate({
+          path: 'owner likes',
+          select: 'userNickName userProfilePicture',
+        })
+        .populate({
+          path: 'comments',
+          select: '-postId -__v ',
+          populate: {
+            path: 'user',
+            select: 'userNickName userProfilePicture',
+          },
+        })
+        .select('-__v -deleted');
+      return myPosts;
+    }
+    return null;
+
     // const myPosts = await this.PostModel.find({
     //   owner: '63578f6761e297c1a19c1b70',
     // });
-    return myPosts;
   }
 }

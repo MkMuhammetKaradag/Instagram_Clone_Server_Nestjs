@@ -55,7 +55,7 @@ export class UserService {
 
   public async getUserById(userId: string): Promise<UserDocument> {
     const user = await this.UserModel.findById(userId).select(
-      '_id userProfilePicture userNickName email',
+      '_id userProfilePicture userNickName email followUps',
     );
 
     return user;
@@ -368,5 +368,15 @@ export class UserService {
     await this.UserModel.findByIdAndUpdate(userId, {
       $pull: { followRequests: followerUserId },
     });
+  }
+
+  public async addChat(chatId: string, userId: string, sessionId: string) {
+    const user = await this.UserModel.updateMany(
+      { _id: { $in: [userId, sessionId] } },
+      {
+        $push: { chats: chatId },
+      },
+    );
+    return user;
   }
 }

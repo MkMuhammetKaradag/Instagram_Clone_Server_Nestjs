@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import {
+  CHAT_COLLECTION_NAME,
   POST_COLLECTION_NAME,
   USER_COLLECTION_NAME,
 } from 'src/config/contants';
@@ -135,6 +136,17 @@ export class User {
     required: true,
   })
   gender: UserGender;
+
+  @Prop({
+    type: [
+      {
+        type: Types.ObjectId,
+        ref: CHAT_COLLECTION_NAME,
+      },
+    ],
+    default: [],
+  })
+  chats: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -28,13 +28,13 @@ export class ChatController {
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   public async getChats(@Session() session: SessionDoc) {
-    const Chats = await this.ChatService.getChats(session.context.id);
+    const chats = await this.ChatService.getChats(session.context.id);
 
     this.logger.log('Chats fetched', ChatController.name);
 
     return {
       message: 'Chats fetched',
-      data: { Chats },
+      data: { chats },
     };
   }
   @Get('messages/:chatId')
@@ -69,11 +69,18 @@ export class ChatController {
     };
   }
   @Post('message/:chatId')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(AuthGuard)
   public async addMessage(
     @Body() createMessage: CreateMessageDto,
     @Param('chatId') chatId: string,
+    @Session() session: SessionDoc,
   ) {
-    const meesage = await this.ChatService.addMessage(createMessage, chatId);
+    const meesage = await this.ChatService.addMessage(
+      createMessage,
+      chatId,
+      session.context.id,
+    );
 
     this.logger.log('Message Created', ChatController.name);
 
