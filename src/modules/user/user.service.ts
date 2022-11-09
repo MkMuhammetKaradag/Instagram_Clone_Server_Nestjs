@@ -73,7 +73,33 @@ export class UserService {
         { userNickName: userNickName, profilePrivate: false },
         { userNickName: userNickName, followers: { $in: myUserId } },
       ],
-    }).select('-userLikes -followRequests -myFollowRequests');
+    })
+      .populate({
+        path: 'followers followUps',
+        select: 'userNickName _id userProfilePicture',
+      })
+      .populate({
+        path: 'userPosts',
+        select: '-deleted -__v  -owner -owner_1',
+        options: { sort: { createdAt: -1 } },
+        populate: [
+          {
+            path: 'comments',
+            select: '-postId',
+            populate: {
+              path: 'user',
+              select: 'userNickName _id userProfilePicture',
+            },
+          },
+          {
+            path: 'likes',
+            select: 'userNickName _id userProfilePicture',
+          },
+        ],
+      })
+      .select(
+        '-userLikes -chats -__v -gender -followRequests -myFollowRequests',
+      );
 
     if (!user) {
       const privateUser = await this.UserModel.findOne({
