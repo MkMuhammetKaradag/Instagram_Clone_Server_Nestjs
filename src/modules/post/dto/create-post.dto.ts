@@ -9,7 +9,7 @@ export class CreatePostDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  hashtags: string[];
+  hashtags: string;
 
   @ApiProperty({ type: 'string', required: false })
   @IsOptional()

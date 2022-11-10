@@ -125,6 +125,7 @@ export class PostService {
 
     const post = await this.PostModel.create({
       ...createdPost,
+      hashtags: createdPost.hashtags.split(','),
       owner: UserId,
       image_url: createdPost.type == 'IMAGE' ? fileUrl : null,
       video_url: createdPost.type == 'VIDEO' ? fileUrl : null,
@@ -216,7 +217,10 @@ export class PostService {
     return myPosts;
   }
 
-  public async getMyFollowUpsPosts(userId: string): Promise<PostDocument[]> {
+  public async getMyFollowUpsPosts(
+    userId: string,
+    pageNumber,
+  ): Promise<PostDocument[]> {
     const { followUps } = await this.userService.getUserById(userId);
     if (followUps) {
       const usersID = followUps.map((user) => user.toString());
@@ -236,6 +240,8 @@ export class PostService {
             select: 'userNickName userProfilePicture',
           },
         })
+        .skip(pageNumber > 0 ? (pageNumber - 1) * 5 : 0)
+        .limit(5)
         .select('-__v -deleted');
       return myPosts;
     }

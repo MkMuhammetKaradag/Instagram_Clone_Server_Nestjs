@@ -13,8 +13,11 @@ import {
   UseInterceptors,
   BadRequestException,
   Get,
+  ParseIntPipe,
+  DefaultValuePipe,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiConsumes, ApiQuery } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { PostService } from './post.service';
@@ -64,10 +67,11 @@ export class PostController {
   @UseInterceptors(
     FileInterceptor('file', {
       fileFilter: ({ body }, { mimetype }, cb) => {
-        //console.log(body);
         if (
-          (mimetype.includes('image') && body?.type == 'IMAGE') ||
-          (mimetype.includes('video') && body?.type == 'VIDEO')
+          mimetype.includes('image') ||
+          body?.type == 'IMAGE' ||
+          mimetype.includes('video') ||
+          body?.type == 'VIDEO'
         ) {
           return cb(null, true);
         }
@@ -81,7 +85,7 @@ export class PostController {
     @Body() createPostDto: CreatePostDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    //console.log('file:', file);
+    // console.log('file:', createPostDto);
     const post = await this.postService.createdPost(
       session.context.id,
       createPostDto,
@@ -170,11 +174,18 @@ export class PostController {
   }
 
   @Get('/myFollowUpsPosts')
+  @ApiQuery({ name: 'pageNuber', type: Number })
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  public async getMyFollowUpsPosts(@Session() session: SessionDoc) {
+  public async getMyFollowUpsPosts(
+    @Session() session: SessionDoc,
+    // @Param('pageNumber') pageNumber: number,
+    @Query('pageNuber', new DefaultValuePipe(1), ParseIntPipe)
+    pageNumber: Number = 1,
+  ) {
     const myFollowUpsPosts = await this.postService.getMyFollowUpsPosts(
       session.context.id,
+      pageNumber,
     );
     return {
       message: 'get my follow ups  posts',
