@@ -55,7 +55,7 @@ export class UserService {
 
   public async getUserById(userId: string): Promise<UserDocument> {
     const user = await this.UserModel.findById(userId).select(
-      '_id userProfilePicture userNickName email followUps',
+      '_id userProfilePicture userNickName email userLikes chats followUps',
     );
 
     return user;
@@ -67,11 +67,23 @@ export class UserService {
     //   '',
     // );
   }
-  public async getUserNickName(userNickName: string, myUserId: string) {
+  public async getUserNickName(
+    userNickName: string,
+    myUserId: string,
+    myUserNickName: string,
+  ) {
     const user = await this.UserModel.findOne({
-      $or: [
-        { userNickName: userNickName, profilePrivate: false },
-        { userNickName: userNickName, followers: { $in: myUserId } },
+      $and: [
+        {
+          userNickName: userNickName,
+        },
+        {
+          $or: [
+            { profilePrivate: false },
+            { _id: myUserId },
+            { followers: { $in: myUserId } },
+          ],
+        },
       ],
     })
       .populate({
@@ -100,7 +112,7 @@ export class UserService {
       .select(
         '-userLikes -chats -__v -gender -followRequests -myFollowRequests',
       );
-
+    // console.log(user);
     if (!user) {
       const privateUser = await this.UserModel.findOne({
         userNickName: userNickName,

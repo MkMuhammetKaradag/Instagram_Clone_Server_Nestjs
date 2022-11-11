@@ -46,6 +46,7 @@ export class UserController {
     const user = await this.userService.getUserNickName(
       userNickName,
       session.context.id,
+      session.context.userNickName,
     );
     return {
       message: 'User Fetched',
