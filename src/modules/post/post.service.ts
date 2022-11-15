@@ -166,6 +166,25 @@ export class PostService {
     return null;
   }
 
+  public async getCommentsFromPost(postId: string, pageNumber: number) {
+    const comments = await this.PostModel.findById(postId)
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'user',
+          select: 'userNickName userProfilePicture _id',
+        },
+        options: {
+          skip: pageNumber > 0 ? (pageNumber - 1) * 10 : 0,
+          limit: 10,
+        },
+        select: '-postId -__v',
+      })
+      .select('comments -_id');
+
+    return comments;
+  }
+
   public async addLikeToPost(userId: string, postId: string) {
     const postLikes = await this.PostModel.findById(postId);
     const hasPostLike = postLikes.likes.some(

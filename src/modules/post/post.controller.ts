@@ -121,6 +121,28 @@ export class PostController {
     };
   }
 
+  @Get('/comment/:postId')
+  @ApiQuery({ name: 'pageNuber', type: Number })
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  public async getCommentsFromPost(
+    @Session() session: SessionDoc,
+    @Param('postId') postId: string,
+    @Query('pageNuber', new DefaultValuePipe(1), ParseIntPipe)
+    pageNumber: number = 1,
+  ) {
+    const { comments } = await this.postService.getCommentsFromPost(
+      postId,
+      pageNumber,
+    );
+    return {
+      message: 'get comments',
+      data: {
+        comments,
+      },
+    };
+  }
+
   @Put('/like/:postId')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(AuthGuard)
