@@ -45,6 +45,7 @@ export class AuthController {
           email: user.email,
           userProfilePicture: user.userProfilePicture,
           userNickName: user.userNickName,
+          userLikes: user.userLikes,
         },
       },
     };

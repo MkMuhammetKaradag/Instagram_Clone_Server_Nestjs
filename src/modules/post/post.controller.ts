@@ -33,8 +33,15 @@ export class PostController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  public async getPost(@Session() session: SessionDoc) {
-    const posts = await this.postService.getPosts(session.context.id);
+  public async getPost(
+    @Session() session: SessionDoc,
+    @Query('pageNuber', new DefaultValuePipe(1), ParseIntPipe)
+    pageNumber: number = 1,
+  ) {
+    const posts = await this.postService.getPosts(
+      session.context.id,
+      pageNumber,
+    );
     return {
       message: 'get Posts',
       data: {

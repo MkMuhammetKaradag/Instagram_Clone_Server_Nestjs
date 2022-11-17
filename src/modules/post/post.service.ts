@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus, Options } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { S3Service } from 'src/provider/s3/s3.service';
 import { UserService } from '../user/user.service';
 import { AddCommentToPostDto } from './dto/add-comment.-to-post.dto';
@@ -23,7 +23,11 @@ export class PostService {
     private readonly s3Service: S3Service,
   ) {}
 
-  public async getPosts(userId: string) {
+  public async getPosts(
+    userId: string,
+    pageNumber: number,
+  ): Promise<PostDocument[]> {
+    console.log(userId);
     const posts = await this.PostModel.aggregate([
       { $set: { owner: { $toObjectId: '$owner' } } },
       {
@@ -41,6 +45,7 @@ export class PostService {
                 email: 1,
                 userProfilePicture: 1,
                 profilePrivate: 1,
+                followers: 1,
               },
             },
           ],
@@ -60,19 +65,35 @@ export class PostService {
           _id: 1,
           description: 1,
           type: 1,
-          owner: 1,
+          image_url: 1,
+          video_url: 1,
+          comments: 1,
+          likes: 1,
+          createdAt: 1,
+          hastags: 1,
+          // owner: 1,
 
-          filtereduser: {
+          owner: {
             $filter: {
               input: '$user',
-              cond: { $eq: [false, '$$this.profilePrivate'] },
+              cond: {
+                $or: [
+                  { $eq: [false, '$$this.profilePrivate'] },
+                  {
+                    $in: [
+                      new mongoose.Types.ObjectId(userId),
+                      '$$this.followers',
+                    ],
+                  },
+                ],
+              },
             },
           },
         },
       },
       {
         $match: {
-          filtereduser: { $ne: [] },
+          owner: { $ne: [] },
         },
       },
 
@@ -84,7 +105,9 @@ export class PostService {
       //   },
       // },
       // { $project: { fromItems: 0 } },
-    ]);
+    ])
+      .skip(pageNumber > 0 ? (pageNumber - 1) * 10 : 0)
+      .limit(10);
     // .lookup({
     //   from: 'User',
     //   localField: 'owner',
@@ -248,16 +271,8 @@ export class PostService {
         owner: { $in: usersID },
       })
         .populate({
-          path: 'owner likes',
+          path: 'owner',
           select: 'userNickName userProfilePicture',
-        })
-        .populate({
-          path: 'comments',
-          select: '-postId -__v ',
-          populate: {
-            path: 'user',
-            select: 'userNickName userProfilePicture',
-          },
         })
         .skip(pageNumber > 0 ? (pageNumber - 1) * 5 : 0)
         .limit(5)
