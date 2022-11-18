@@ -24,22 +24,37 @@ export class UserService {
   public async getUser(userId: string): Promise<UserDocument[]> {
     return this.UserModel.find();
   }
+  public async getSearhUser(
+    searchText: string,
+    pageNumber: number,
+  ): Promise<UserDocument[]> {
+    return this.UserModel.find({
+      userNickName: new RegExp(searchText, 'i'),
+    })
+      .select('userNickName userProfilePicture')
+      .skip(pageNumber > 0 ? (pageNumber - 1) * 5 : 0)
+      .limit(5);
+  }
 
   public async createUser(createUser: CreateUserDto): Promise<UserDocument> {
+    // console.log('userService:', createUser);
     try {
       const response = await this.UserModel.create(createUser);
+      // console.log('userService', response);
       return response;
     } catch (error) {
-      const isExistList = Object.keys(error.keyPattern);
-      //console.log(error);
-
-      throw new BadRequestException(
-        isExistList.includes('email')
-          ? `User with the given email already exists [email: ${error.keyValue.email}]`
-          : isExistList.includes('userNickName')
-          ? `User with the given user nick name  already exists [Nick Name: ${error.keyValue.userNickName}]`
-          : 'Bad Request',
-      );
+      if (error.keyPattern) {
+        const isExistList = Object.keys(error.keyPattern);
+        throw new BadRequestException(
+          isExistList.includes('email')
+            ? `User with the given email already exists [email: ${error.keyValue.email}]`
+            : isExistList.includes('userNickName')
+            ? `User with the given user nick name  already exists [Nick Name: ${error.keyValue.userNickName}]`
+            : 'Bad Request',
+        );
+      } else {
+        throw new BadRequestException(error);
+      }
     }
   }
   public async getUserByEmail(email: string): Promise<UserDocument> {

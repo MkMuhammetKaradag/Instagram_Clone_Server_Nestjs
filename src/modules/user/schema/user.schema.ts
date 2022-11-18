@@ -133,7 +133,6 @@ export class User {
     type: String,
     enum: ['MALE', 'FEMALE', null],
     default: null,
-    required: true,
   })
   gender: UserGender;
 

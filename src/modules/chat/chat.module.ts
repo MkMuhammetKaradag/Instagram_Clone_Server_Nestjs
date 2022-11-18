@@ -3,7 +3,7 @@ import { ChatService } from './Chat.service';
 import { ChatController } from './Chat.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MessageSchema } from './schema/message.schema';
-import { ChatSchema } from './schema/chat.schema';
+import { ChatSchema } from './schema/Chat.schema';
 import {
   CHAT_COLLECTION_NAME,
   MESSAGE_COLLECTION_NAME,

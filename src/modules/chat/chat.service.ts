@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { UserService } from '../user/user.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { ChatDocument } from './schema/chat.schema';
+import { ChatDocument } from './schema/Chat.schema';
 import { MessageDocument } from './schema/message.schema';
 
 @Injectable()

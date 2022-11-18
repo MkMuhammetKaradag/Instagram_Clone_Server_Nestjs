@@ -2,19 +2,22 @@ import {
   BadRequestException,
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
   Put,
+  Query,
   Session,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { UserService } from './user.service';
 import session, { Session as SessionDoc } from 'express-session';
@@ -33,6 +36,26 @@ export class UserController {
     const users = await this.userService.getUser(session.context.id);
     return {
       message: 'User Fetched',
+      data: { users },
+    };
+  }
+  @Get('/search')
+  @HttpCode(HttpStatus.OK)
+  // @ApiQuery([
+  //   { name: 'searchText', type: String },
+  //   { name: 'pageNuber', type: Number },
+  // ])
+  @UseGuards(AuthGuard)
+  public async getUserSearch(
+    @Session() session: SessionDoc,
+    @Query('searchText') searchText: string,
+    @Query('pageNuber', new DefaultValuePipe(1), ParseIntPipe)
+    pageNumber: number = 1,
+  ) {
+    console.log(searchText);
+    const users = await this.userService.getSearhUser(searchText, pageNumber);
+    return {
+      message: 'User search',
       data: { users },
     };
   }

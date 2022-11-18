@@ -10,6 +10,7 @@ export class AuthService {
   constructor(private readonly userService: UserService) {}
   public async createUser(createUser: CreateUserDto): Promise<UserDocument> {
     const user = await this.userService.createUser(createUser);
+    console.log('auth service:', user);
     return user;
   }
   public async login({ email, password }: LoginUserDto): Promise<UserDocument> {

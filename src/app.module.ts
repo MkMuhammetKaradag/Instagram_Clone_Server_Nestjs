@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
-import { ChatModule } from './modules/chat/chat.module';
+import { ChatModule } from './modules/chat/Chat.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
 import { PostModule } from './modules/post/pot.module';
 import { UserModule } from './modules/user/user.module';
