@@ -127,7 +127,7 @@ export class UserController {
     };
   }
 
-  @Post('/fallowUser/:followUpUserId')
+  @Post('/followUser/:followUpUserId')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(AuthGuard)
   public async fallowUser(

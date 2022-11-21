@@ -46,6 +46,10 @@ export class AuthController {
           userProfilePicture: user.userProfilePicture,
           userNickName: user.userNickName,
           userLikes: user.userLikes,
+          myFollowRequests: user.myFollowRequests,
+          followRequests: user.followRequests,
+          followers: user.followers,
+          followUps: user.followUps,
         },
       },
     };

@@ -70,7 +70,7 @@ export class UserService {
 
   public async getUserById(userId: string): Promise<UserDocument> {
     const user = await this.UserModel.findById(userId).select(
-      '_id userProfilePicture userNickName email userLikes chats followUps',
+      '_id userProfilePicture userNickName email userLikes chats followUps followUps myFollowRequests',
     );
 
     return user;
@@ -131,16 +131,19 @@ export class UserService {
     if (!user) {
       const privateUser = await this.UserModel.findOne({
         userNickName: userNickName,
-      }).select('userNickName _id  userProfilePicture followers followUps');
+      }).select(
+        'userNickName _id  userProfilePicture followers followUps profilePrivate',
+      );
       if (!privateUser) {
         throw new HttpException('Cannot  user.', HttpStatus.BAD_REQUEST);
       }
       return {
-        followers: privateUser.followUps.length,
+        followers: privateUser.followUps,
         userNickName: privateUser.userNickName,
         _id: privateUser._id,
-        followUps: privateUser.followUps.length,
+        followUps: privateUser.followUps,
         userProfilePicture: privateUser.userProfilePicture,
+        profilePrivate: privateUser.profilePrivate,
       };
     }
 
@@ -343,6 +346,12 @@ export class UserService {
     );
 
     if (hasFollowUpUser || hasFollowUser) {
+      console.log(
+        'hasFollowUpUser',
+        hasFollowUpUser,
+        'hasFollowUser',
+        hasFollowUser,
+      );
       throw new HttpException(
         'Cannot  follow Request.',
         HttpStatus.BAD_REQUEST,
